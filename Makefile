@@ -4,4 +4,4 @@ install:
 	pip install -r requirements.txt
 
 run:
-	cd .\test && pytest
+	cd test && pytest -s
