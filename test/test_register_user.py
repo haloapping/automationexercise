@@ -1,4 +1,6 @@
+import os
 import random
+from datetime import datetime
 
 import xlwings as xw
 from faker import Faker
@@ -9,7 +11,6 @@ from selector import home_page, signup_page
 
 
 def test_signup(page: Page):
-    print(page.inner_html(signup_page.ENTER_ACCOUNT_INFO_TEXT))
     expect(page.locator(signup_page.ENTER_ACCOUNT_INFO_TEXT)).to_contain_text("Enter Account Information")
 
     faker = Faker()
@@ -59,6 +60,10 @@ def test_signup(page: Page):
 
     # mobile number
     page.fill(signup_page.MOBILE_NUMBER_INPUT_TEXT, faker.phone_number())
+
+    os.makedirs(name="../data/capture", exist_ok=True)
+    datetimenow: datetime = datetime.now()
+    page.screenshot(path="../data/capture/user_register_" + datetimenow.strftime("%Y-%m-%d_%H-%M-%S") + ".jpg", full_page=True)
 
     # signup button
     page.click(signup_page.CREATE_ACCOUNT_BUTTON)
