@@ -10,11 +10,11 @@ from playwright.sync_api._generated import Browser, BrowserContext
 from selector import home_page, signup_page
 
 
-def create_fake_account() -> tuple[int, dict[str, str]]:
+def create_fake_account() -> dict[str, str]:
     faker = Faker("id_ID")
-    name: str = faker.user_name()
-    email: str = faker.free_email()
-    password: str = faker.password(length=10)
+    name = faker.user_name()
+    email = faker.free_email()
+    password = faker.password(length=10)
     title: str = random.choice(["Mr.", "Mrs."])
     day: str = random.choice([str(i) for i in range(1, 32)])
     month: str = random.choice(["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"])
@@ -34,7 +34,7 @@ def create_fake_account() -> tuple[int, dict[str, str]]:
     # to excel file
     book = xw.Book("../data/form.xlsx")
     sheet = book.sheets["signup"]
-    next_row: int = len(sheet.range("A1").expand().value) + 1
+    next_row = len(sheet.range("A1").expand().value) + 1
     sheet[f"A{next_row}"].value = name
     sheet[f"B{next_row}"].value = email
     sheet[f"C{next_row}"].value = title
@@ -56,7 +56,7 @@ def create_fake_account() -> tuple[int, dict[str, str]]:
     sheet.range(f"A{next_row}:Q{next_row}").api.VerticalAlignment = xw.constants.VAlign.xlVAlignCenter
     book.save()
 
-    return next_row, {
+    return {
         "name": name,
         "email": email,
         "password": password,
@@ -77,7 +77,7 @@ def create_fake_account() -> tuple[int, dict[str, str]]:
     }
 
 
-def signup(page: Page, account: dict[str, str]):
+def test_signup(page: Page, account: dict[str, str]):
     # form account information
     # title
     page.get_by_label(account["title"]).check()
@@ -137,20 +137,20 @@ with sync_playwright() as p:
     page.goto("https://automationexercise.com/")
 
     # create fake account
-    next_row, account = create_fake_account()
-    print(next_row)
+    account = create_fake_account()
 
     # homepage
     page.click(home_page.LOGIN_SIGNUP_LINK)
     book: xw.Book = xw.Book("../data/form.xlsx")
     sheet: xw.Sheet = book.sheets("signup")
-    name: str = sheet[f"A{next_row}"].value
-    email: str = sheet[f"B{next_row}"].value
+    last_row = len(sheet.range("A1").expand().value) + 1
+    name: str = sheet[f"A{last_row}"].value
+    email: str = sheet[f"B{last_row}"].value
     page.fill(home_page.NAME_INPUT_TEXT, account["name"])
     page.fill(home_page.SIGNUP_EMAIL_ADDRESS_INPUT_TEXT, account["email"])
     page.click(home_page.SIGNUP_BUTTON)
 
-    signup(page, account)
+    test_signup(page, account)
 
     # close all process
     book.close()
